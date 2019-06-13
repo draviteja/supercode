@@ -1,4 +1,4 @@
-package com.supercode.util;
+package com.supercode.utils;
 
 import com.supercode.exception.ValidationException;
 

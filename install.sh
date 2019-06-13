@@ -21,7 +21,7 @@ apt install -y default-jdk
 # TESTING vvv
 pkill -f "java"
 wget https://github.com/TwinProduction/spring-as-backend/releases/download/v0.0.3/spring-as-backend.jar
-java -jar spring-as-backend.jar > /dev/nul &
+java -jar target/*.jar > /dev/nul &
 # TESTING ^^^
 
 apt update
