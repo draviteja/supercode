@@ -42,7 +42,7 @@ public class AppController {
             redisTemplate.opsForList().rightPushAll("test", test);
         }
         String result = restTemplate.getForObject("https://labs.supercode.info/robots.txt", String.class);
-        System.out.println("result========="+result);
+        //System.out.println("result========="+result);
 
         return "PONG";
     }

@@ -20,23 +20,23 @@ import com.supercode.config.RabbitMQConfig.EnableMessageBroker;
 public class RabbitMQConfig {
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQConfig.class);
 
-    static final String topicExchangeName = "spring-boot-exchange";
-
-    static final String queueName = "spring-boot";
+    private static final String EXCHANGE_NAME = "spring-boot-exchange";
+    private static final String QUEUE_NAME = "spring-boot";
+    private static final String ROUTING_KEY = "foo.bar.#";
 
     @Bean
     Queue queue() {
-        return new Queue(queueName, true);
+        return new Queue(QUEUE_NAME, true);
     }
 
     @Bean
     TopicExchange exchange() {
-        return new TopicExchange(topicExchangeName,true,false);
+        return new TopicExchange(EXCHANGE_NAME,true,false);
     }
 
     @Bean
     Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with("foo.bar.#");
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
     }
 
     @Bean
@@ -44,7 +44,7 @@ public class RabbitMQConfig {
                                              MessageListenerAdapter listenerAdapter) {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(queueName);
+        container.setQueueNames(QUEUE_NAME);
         container.setMessageListener(listenerAdapter);
         return container;
     }
