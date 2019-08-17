@@ -1,13 +1,12 @@
-package com.supercode.model;
+package com.supercode.entity;
 
+import com.supercode.model.RoleName;
 import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 
-/**
- * Created by rajeevkumarsingh on 01/08/17.
- */
+
 @Entity
-@Table(name = "roles")
+@Table(name = "role")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

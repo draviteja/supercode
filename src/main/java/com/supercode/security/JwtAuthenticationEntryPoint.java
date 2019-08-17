@@ -23,16 +23,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest httpServletRequest,
                          HttpServletResponse httpServletResponse,
                          AuthenticationException e) throws IOException, ServletException {
-        //logger.error("Responding with unauthorized error. Message - {}", e.getMessage());
-        //httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+        logger.error("Responding with unauthorized error. Message - {}", e.getMessage());
+        httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
 
-        Map<String, Object> responseMap = new HashMap<>();
-        httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        /*httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("error", e.getMessage());
         responseMap.put("code", HttpServletResponse.SC_UNAUTHORIZED);
         byte[] body = new ObjectMapper().writeValueAsBytes(responseMap);
-        httpServletResponse.getOutputStream().write(body);
+        httpServletResponse.getOutputStream().write(body);*/
 
     }
 }

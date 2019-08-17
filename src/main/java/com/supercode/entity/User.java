@@ -7,9 +7,13 @@ import com.supercode.listener.AuditEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Entity for table user
@@ -17,54 +21,81 @@ import java.util.Objects;
 @Entity
 @EntityListeners(AuditEntityListener.class)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Table(name="USERS")
+@Table( name="users",
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = {
+                    "username"
+            }),
+            @UniqueConstraint(columnNames = {
+                    "email"
+            })
+        }
+)
 public class User extends Auditable<String>{
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name="USER_ID", nullable = false)
-    String userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name="FIRST_NAME", nullable = false)
-    String firstName;
+    @Column(name="FIRST_NAME")
+    private String firstName;
 
     @Column(name="LAST_NAME")
-    String lastName;
+    private String lastName;
 
-    @Column(name="EMAIL_ID")
-    String emailId;
+    @NotEmpty
+    @Column(name="EMAIL", nullable = false)
+    @Email(message="{errors.invalid_email}")
+    private String email;
+
+    @NotEmpty
+    @Size(max = 15)
+    @Column(name="USERNAME", nullable = false)
+    private String username;
+
+    @NotEmpty
+    @Column(name="PASSWORD", nullable = false)
+    @Size(min=4)
+    private String password;
 
     @Column(name="STATUS", nullable = false)
     @Enumerated(EnumType.STRING)
-    UserStatus status;
+    private UserStatus status = UserStatus.ACTIVE;
 
-    @Column(name="ACCESS_LEVEL", nullable = false)
-    @Enumerated(EnumType.STRING)
-    AccessLevel accessLevel;
+    @Column(name="PASSWORD_UPDATED_AT")
+    private Timestamp passwordUpdatedAt;
 
-    @Column(name="USER_TYPE", nullable = false)
-    @Enumerated(EnumType.STRING)
-    UserType userType;
+    @Column(name="LAST_LOGGED_IN")
+    private Timestamp lastLoggedIn;
 
-    @Column(name="COMMENTS")
-    String comments;
+   /* @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
+    @JoinTable(
+            name = "USER_ROLES",
+            joinColumns = @JoinColumn(
+                    name = "USER_ID", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "ROLE_ID", referencedColumnName = "id"))
+    private Set<Role> roles;*/
 
-    @Column(name="PASSWORD", nullable = false)
-    String password;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "USER_ROLES", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
-    @Column(name="PASSWORD_UPDATED_AT", nullable = false)
-    Timestamp passwordUpdatedAt;
+    /*@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Address address;*/
 
-    @Column(name="LAST_LOGGED_IN", nullable = false)
-    Timestamp lastLoggedIn;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
 
-    public String getUserId() {
-        return userId;
+    public Long getId() {
+        return id;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -83,12 +114,33 @@ public class User extends Auditable<String>{
         this.lastName = lastName;
     }
 
-    public String getEmailId() {
-        return emailId;
+
+    public String getName(){
+        return firstName!=null?firstName:""+" "+lastName!=null?lastName:"";
     }
 
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public UserStatus getStatus() {
@@ -99,36 +151,12 @@ public class User extends Auditable<String>{
         this.status = status;
     }
 
-    public AccessLevel getAccessLevel() {
-        return accessLevel;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setAccessLevel(AccessLevel accessLevel) {
-        this.accessLevel = accessLevel;
-    }
-
-    public UserType getUserType() {
-        return userType;
-    }
-
-    public void setUserType(UserType userType) {
-        this.userType = userType;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public Timestamp getPasswordUpdatedAt() {
@@ -150,14 +178,11 @@ public class User extends Auditable<String>{
     @Override
     public String toString() {
         return "User{" +
-                "userId='" + userId + '\'' +
+                "userId='" + id + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", emailId='" + emailId + '\'' +
+                ", emailId='" + email + '\'' +
                 ", status='" + status + '\'' +
-                ", accessLevel=" + accessLevel +
-                ", userType=" + userType +
-                ", comments='" + comments + '\'' +
                 ", password='" + password + '\'' +
                 ", passwordUpdatedAt=" + passwordUpdatedAt +
                 ", lastLoggedIn=" + lastLoggedIn +
@@ -169,14 +194,12 @@ public class User extends Auditable<String>{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(userId, user.userId) &&
+        return Objects.equals(id, user.id) &&
                 Objects.equals(firstName, user.firstName) &&
                 Objects.equals(lastName, user.lastName) &&
-                Objects.equals(emailId, user.emailId) &&
+                Objects.equals(email, user.email) &&
                 status == user.status &&
-                accessLevel == user.accessLevel &&
-                userType == user.userType &&
-                Objects.equals(comments, user.comments) &&
+
                 Objects.equals(password, user.password) &&
                 Objects.equals(passwordUpdatedAt, user.passwordUpdatedAt) &&
                 Objects.equals(lastLoggedIn, user.lastLoggedIn);
@@ -185,7 +208,7 @@ public class User extends Auditable<String>{
     @Override
     public int hashCode() {
 
-        return Objects.hash(userId, firstName, lastName, emailId, status, accessLevel, userType, comments, password, passwordUpdatedAt, lastLoggedIn);
+        return Objects.hash(id, firstName, lastName, email, status, password, passwordUpdatedAt, lastLoggedIn);
     }
 }
 

@@ -25,7 +25,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
         if (authentication == null || !(authentication.getPrincipal() instanceof CurrentUser || authentication instanceof AnonymousAuthenticationToken)) {
             return Optional.of("guest");
         }
-        return Optional.of(((CurrentUser) authentication.getPrincipal()).getId());
+        return Optional.of(((CurrentUser) authentication.getPrincipal()).getId().toString());
     }
 }
 

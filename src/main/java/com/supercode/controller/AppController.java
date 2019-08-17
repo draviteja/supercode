@@ -16,11 +16,14 @@ import java.util.List;
 @RequestMapping(path = "/api")
 public class AppController {
 
-    @Autowired
-    RedisTemplate redisTemplate;
+    private RedisTemplate redisTemplate;
+    private RestTemplate restTemplate;
 
     @Autowired
-    RestTemplate restTemplate;
+    public AppController(RedisTemplate redisTemplate, RestTemplate restTemplate) {
+        this.redisTemplate = redisTemplate;
+        this.restTemplate = restTemplate;
+    }
 
     @RequestMapping("/")
     public String home() {
@@ -30,6 +33,7 @@ public class AppController {
     //@CrossOrigin(origins = "http://localhost:8080")
     @RequestMapping(value = "/ping")
     public String healthCheck() {
+        System.out.println("===================api entry point==================");
         if (redisTemplate.hasKey("test")) {
             System.out.println(redisTemplate.opsForList().range("test", 0, -1));
         }

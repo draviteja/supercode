@@ -1,6 +1,6 @@
 package com.supercode.repository;
 
-import com.supercode.model.User;
+import com.supercode.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameOrEmail(String username, String email);
 
     List<User> findByIdIn(List<Long> userIds);
+
+    Optional<User> findById(Long userId);
 
     Optional<User> findByUsername(String username);
 

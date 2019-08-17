@@ -1,37 +1,31 @@
 package com.supercode.controller;
 
-import com.supercode.model.RoleName;
-import com.supercode.model.User;
-import com.supercode.model.Role;
-import com.supercode.payload.ApiResponse;
 import com.supercode.payload.JwtAuthenticationResponse;
 import com.supercode.payload.LoginRequest;
-import com.supercode.payload.SignUpRequest;
 import com.supercode.security.JwtTokenProvider;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.net.URI;
-import java.util.Collections;
 
+@ApiModel(description="Session controller for login and logout")
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class SessionController {
 
-    Logger logger = LoggerFactory.getLogger(AuthController.class);
+    Logger logger = LoggerFactory.getLogger(SessionController.class);
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -39,22 +33,25 @@ public class AuthController {
     @Autowired
     JwtTokenProvider tokenProvider;
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    @ApiOperation(value = "Login user",
+            notes = "return a jwt token for valid credentials")
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
 
-        logger.info("user login initiated for user : " + loginRequest.getUsername());
-
+        logger.info("user login initiated for user with name : " + loginRequest.getUsername());
+        logger.info("user login initiated for user with pwd: " + loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(
                 getAuthenticationObject(loginRequest)
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String jwt = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+        String jwtToken = tokenProvider.generateToken(authentication);
+        //response.setHeader("Token", jwtToken);
+        Cookie sessionCookie = new Cookie( "token", jwtToken );
+        response.addCookie( sessionCookie );
+        return ResponseEntity.ok(new JwtAuthenticationResponse(jwtToken));
     }
 
-    /*@PostMapping("/signup")
+    /*@PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         if(userRepository.existsByUsername(signUpRequest.getUsername())) {
             return new ResponseEntity(new ApiResponse(false, "Username is already taken!"),

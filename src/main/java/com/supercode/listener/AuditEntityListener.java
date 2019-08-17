@@ -58,7 +58,7 @@ public class AuditEntityListener {
      * @throws JsonProcessingException
      */
     @Transactional(Transactional.TxType.MANDATORY)
-    private void perform(Object object, AuditEventType action) throws JsonProcessingException{
+    protected void perform(Object object, AuditEventType action) throws JsonProcessingException{
         logger.debug("performing audit action : " + action.toString());
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonValue = objectMapper.writeValueAsString(object);
